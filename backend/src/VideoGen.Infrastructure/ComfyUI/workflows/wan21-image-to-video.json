@@ -1,0 +1,9 @@
+{
+  "NOTE": "Replace this illustrative template with API JSON exported from your Wan 2.1 ComfyUI workflow. Keep the placeholders intact and ensure the final SaveVideo node returns an MP4 in history outputs.",
+  "1": { "class_type": "LoadImage", "inputs": { "image": "{{PRODUCT_IMAGE_PATH}}" } },
+  "2": { "class_type": "LoadImage", "inputs": { "image": "{{REFERENCE_IMAGE_PATH}}" } },
+  "3": { "class_type": "CLIPTextEncode", "inputs": { "text": "{{POSITIVE_PROMPT}}", "clip": ["YOUR_WAN_TEXT_ENCODER", 0] } },
+  "4": { "class_type": "CLIPTextEncode", "inputs": { "text": "{{NEGATIVE_PROMPT}}", "clip": ["YOUR_WAN_TEXT_ENCODER", 0] } },
+  "5": { "class_type": "WanImageToVideo", "inputs": { "image": ["1", 0], "reference_image": ["2", 0], "positive": ["3", 0], "negative": ["4", 0], "seed": {{SEED}}, "width": {{WIDTH}}, "height": {{HEIGHT}}, "frames": {{FRAMES}} } },
+  "6": { "class_type": "SaveVideo", "inputs": { "images": ["5", 0], "filename_prefix": "video-gen" } }
+}

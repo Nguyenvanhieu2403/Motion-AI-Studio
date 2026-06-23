@@ -1,0 +1,24 @@
+<main class="shell">
+  <header><a class="brand" href="/"><span class="brand-mark">M</span> Motion Studio</a><span class="eyebrow">WAN 2.1 / PRODUCT FILM</span></header>
+  <section class="hero"><div><p class="kicker">From still to story</p><h1>Make the product<br><i>move.</i></h1><p class="intro">Turn a product image and a visual reference into a vertical launch film, ready for the feed.</p></div><div class="format-card"><span>DELIVERY FORMAT</span><strong>09:16</strong><small>5–10 sec · MP4</small></div></section>
+  <section class="studio-grid">
+    <form class="composer" (ngSubmit)="generate()">
+      <div class="section-label"><span>01</span> Source material</div>
+      <div class="uploads">
+        <label class="dropzone" [class.has-image]="productPreview"><input type="file" accept="image/jpeg,image/png,image/webp" (change)="choose('product', $event)"><img *ngIf="productPreview" [src]="productPreview" alt="Product preview"><ng-container *ngIf="!productPreview"><b>Product image</b><small>JPG, PNG or WEBP · max 10 MB</small><em>Choose file</em></ng-container></label>
+        <label class="dropzone" [class.has-image]="referencePreview"><input type="file" accept="image/jpeg,image/png,image/webp" (change)="choose('reference', $event)"><img *ngIf="referencePreview" [src]="referencePreview" alt="Reference preview"><ng-container *ngIf="!referencePreview"><b>Concept reference</b><small>Sets the mood, framing and light</small><em>Choose file</em></ng-container></label>
+      </div>
+      <div class="section-label"><span>02</span> Creative direction</div>
+      <label class="field"><span>Product description</span><textarea [(ngModel)]="description" name="description" placeholder="e.g. Matte black coffee maker with a warm copper dial"></textarea></label>
+      <label class="field"><span>Desired style <small>(optional)</small></span><input [(ngModel)]="style" name="style" placeholder="e.g. dramatic studio light, slow orbital camera"></label>
+      <p class="error" *ngIf="error">{{ error }}</p><button type="submit" [disabled]="submitting"><span>{{ submitting ? 'Creating job…' : 'Generate video' }}</span><b>→</b></button>
+    </form>
+    <aside class="monitor"><div class="monitor-head"><div><p class="kicker">Render monitor</p><h2>{{ job ? job.status : 'Standing by' }}</h2></div><span class="live" [class.on]="job && job.status !== 'Completed' && job.status !== 'Failed'">{{ job ? job.status : 'IDLE' }}</span></div>
+      <div class="timeline"><div *ngFor="let stage of stages" class="step" [class.active]="isActive(stage)" [class.current]="job?.status === stage"><i></i><span>{{ stage === 'PromptGenerated' ? 'Prompt ready' : stage }}</span></div></div>
+      <div class="empty" *ngIf="!job"><span>✦</span><p>Your render timeline will appear here.</p></div>
+      <div class="failure" *ngIf="job?.status === 'Failed'"><b>Render stopped</b><p>{{ job?.errorMessage }}</p></div>
+      <div class="prompt" *ngIf="job?.positivePrompt"><span>DIRECTOR'S PROMPT</span><p>{{ job?.positivePrompt }}</p></div>
+      <div class="video-result" *ngIf="job?.status === 'Completed' && job?.videoUrl"><video controls [src]="job!.videoUrl"></video><a [href]="job!.videoUrl" download="product-video.mp4">Download MP4 <b>↓</b></a></div>
+    </aside>
+  </section>
+</main>

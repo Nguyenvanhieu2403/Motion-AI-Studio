@@ -1,0 +1,36 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoGen.Api", "src\VideoGen.Api\VideoGen.Api.csproj", "{F6D940EE-2D2A-4A53-8D8C-1F2D1EBD5254}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoGen.Application", "src\VideoGen.Application\VideoGen.Application.csproj", "{D7838ED7-711B-432C-8B6F-33BA526E2185}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoGen.Domain", "src\VideoGen.Domain\VideoGen.Domain.csproj", "{58432885-B1BF-4157-9270-28DFA3A39F93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoGen.Infrastructure", "src\VideoGen.Infrastructure\VideoGen.Infrastructure.csproj", "{29C97D01-5D64-4477-97D6-68B4C38079B9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F6D940EE-2D2A-4A53-8D8C-1F2D1EBD5254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6D940EE-2D2A-4A53-8D8C-1F2D1EBD5254}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6D940EE-2D2A-4A53-8D8C-1F2D1EBD5254}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6D940EE-2D2A-4A53-8D8C-1F2D1EBD5254}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7838ED7-711B-432C-8B6F-33BA526E2185}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7838ED7-711B-432C-8B6F-33BA526E2185}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7838ED7-711B-432C-8B6F-33BA526E2185}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7838ED7-711B-432C-8B6F-33BA526E2185}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58432885-B1BF-4157-9270-28DFA3A39F93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58432885-B1BF-4157-9270-28DFA3A39F93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58432885-B1BF-4157-9270-28DFA3A39F93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58432885-B1BF-4157-9270-28DFA3A39F93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29C97D01-5D64-4477-97D6-68B4C38079B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29C97D01-5D64-4477-97D6-68B4C38079B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29C97D01-5D64-4477-97D6-68B4C38079B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29C97D01-5D64-4477-97D6-68B4C38079B9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

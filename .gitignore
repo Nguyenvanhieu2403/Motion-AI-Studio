@@ -1,0 +1,8 @@
+backend/data/
+backend/src/VideoGen.Api/uploads/
+backend/src/VideoGen.Api/outputs/
+**/bin/
+**/obj/
+frontend/node_modules/
+frontend/dist/
+.env
