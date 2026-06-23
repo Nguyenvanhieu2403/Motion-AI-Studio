@@ -29,16 +29,58 @@ npm start
 
 API tự gọi `Database.Migrate()` khi khởi động. Migration gốc nằm tại `backend/src/VideoGen.Infrastructure/Persistence/Migrations`.
 
-## Chuẩn bị workflow Wan 2.1
+## Cài ComfyUI và Wan 2.1 image-to-video
 
-`backend/src/VideoGen.Infrastructure/ComfyUI/workflows/wan21-image-to-video.json` là mẫu cấu trúc, **không thể render ngay** vì mỗi bản cài ComfyUI có node ID/class khác nhau. Trong ComfyUI:
+1. Cài ComfyUI theo hướng dẫn của dự án chính thức, sau đó khởi động với `python main.py --listen 0.0.0.0 --port 8188`.
+2. Trong **ComfyUI-Manager**, cài custom node phù hợp workflow Wan 2.1 I2V bạn chọn (và `ComfyUI-VideoHelperSuite` nếu dùng node `VHS_VideoCombine` để xuất H.264 MP4). Tải model Wan 2.1 image-to-video, text encoder và VAE đúng vị trí mà custom node đó yêu cầu.
+3. Bật menu developer: mở Settings, chọn **Enable Dev mode options**, refresh trang; sau đó mở workflow Wan 2.1 của bạn trong UI.
+4. Thiết kế workflow dọc `576×1024`, `121 frames`, `16 fps` (xấp xỉ 7.6 giây). Dùng ảnh product là image đầu vào chính, ảnh concept là reference/style input nếu node workflow của bạn hỗ trợ; node cuối phải lưu `video/h264-mp4`.
+5. Chọn **Save (API Format)** trong menu workflow và dùng file đó để ghi đè [wan21-image-to-video.json](/D:/PersonalProject/Motion%20AI%20Studio/backend/src/VideoGen.Infrastructure/ComfyUI/workflows/wan21-image-to-video.json).
 
-1. Cài Wan 2.1 image-to-video và tạo workflow 9:16, 5–10 giây, có node xuất MP4 (`SaveVideo`, VHS hoặc node tương đương).
-2. Chọn **Save (API Format)**, ghi đè file mẫu nêu trên.
-3. Giữ các placeholder không có dấu quote cho số: `{{SEED}}`, `{{WIDTH}}`, `{{HEIGHT}}`, `{{FRAMES}}`; giữ trong quote cho chuỗi: `{{PRODUCT_IMAGE_PATH}}`, `{{REFERENCE_IMAGE_PATH}}`, `{{POSITIVE_PROMPT}}`, `{{NEGATIVE_PROMPT}}`.
-4. Upload/copy hai ảnh từ thư mục `uploads` của API vào ComfyUI `input` với đúng filename. Với ComfyUI chạy ngoài Docker, hãy map/sync thư mục này vào `ComfyUI/input` (symlink hoặc shared volume).
+### Template và placeholder
 
-Client gửi workflow tới `/prompt`, poll `/history/{prompt_id}` và tải MP4 qua `/view`. Template cần để node lưu video xuất dữ liệu xuất hiện trong `history.outputs` (mảng `gifs` hoặc `videos`).
+File trong repository là **ComfyUI API Format JSON hợp lệ**, nhưng chỉ là template: các `class_type`/input của Wan khác nhau theo custom node và phiên bản model; không có một graph Wan chính xác cho mọi máy. Sau khi export workflow thật, thay đúng giá trị của nó bằng các placeholder này:
+
+| Phần trong API JSON | Thay bằng |
+| --- | --- |
+| LoadImage product `inputs.image` | `"{{PRODUCT_IMAGE_PATH}}"` |
+| LoadImage/reference `inputs.image` | `"{{REFERENCE_IMAGE_PATH}}"` |
+| Text prompt positive/negative | `"{{POSITIVE_PROMPT}}`, `"{{NEGATIVE_PROMPT}}"` |
+| Seed | `{{SEED}}` |
+| Width / height | `{{WIDTH}}` / `{{HEIGHT}}` |
+| Frame count | `{{FRAMES}}` |
+
+String placeholder phải có dấu quote; số **không** có dấu quote. `ComfyUiWorkflowBuilder` chỉ truyền `Path.GetFileName(...)` cho `LoadImage`, JSON-escape prompt an toàn, kiểm tra không còn placeholder và parse/validate graph trước khi `ComfyUiClient` gọi `/prompt`.
+
+### Chia sẻ thư mục ảnh với ComfyUI
+
+`LoadImage` của ComfyUI chỉ tìm file bên trong `ComfyUI/input`. Backend lưu ảnh tại `uploads`, vì vậy hai thư mục cần dùng chung cùng dữ liệu và **chỉ filename** được truyền trong workflow:
+
+- Docker: mount cùng host folder vào `/app/uploads` của backend và `ComfyUI/input` của container ComfyUI.
+- Chạy ComfyUI trên Windows host: tạo directory junction từ `ComfyUI/input` tới `backend/data/uploads`, ví dụ PowerShell chạy với quyền phù hợp: `New-Item -ItemType Junction -Path <ComfyUI>\input\motion-studio -Target <workspace>\backend\data\uploads`. Nếu node `LoadImage` không chấp nhận subfolder, trỏ cả `input` trực tiếp vào cùng thư mục hoặc copy/sync filename vào `input`.
+
+Client gửi graph đến `/prompt`, poll `/history/{prompt_id}`, tìm output của node trong cả `history.outputs.*.videos` và `.gifs`, rồi tải file qua `/view` về `outputs/<job-id>.mp4`.
+
+### Test ComfyUI bằng curl / Postman
+
+Trước hết copy hai ảnh vào `ComfyUI/input` và tạo `workflow.test.json` từ API workflow export (thay placeholder bằng filename/prompt cụ thể). Trên PowerShell:
+
+```powershell
+$body = @{ prompt = (Get-Content ./workflow.test.json -Raw | ConvertFrom-Json) } | ConvertTo-Json -Depth 100
+Invoke-RestMethod -Method Post -Uri http://localhost:8188/prompt -ContentType 'application/json' -Body $body
+# Lấy prompt_id từ phản hồi, sau đó:
+Invoke-RestMethod -Uri http://localhost:8188/history/<prompt_id>
+```
+
+Ví dụ curl (Windows dùng `curl.exe`):
+
+```bash
+curl.exe -X POST http://localhost:8188/prompt -H "Content-Type: application/json" --data-binary "@workflow.request.json"
+curl.exe "http://localhost:8188/history/<prompt_id>"
+curl.exe -o result.mp4 "http://localhost:8188/view?filename=<filename>.mp4&type=output"
+```
+
+`workflow.request.json` cho curl phải có wrapper `{"prompt": { ...API graph... }}`. Dùng Postman với POST `/prompt`, Body → raw → JSON, rồi GET `/history/{prompt_id}` và GET `/view` với `filename`, `subfolder`, `type` từ output history.
 
 ## API
 
